@@ -1,12 +1,13 @@
-const { STARTING_BALANCE } = require("../config");
-const { ec } = require("../util");
-const { cryptoHash } = require("../util");
 const Transaction = require("./transaction");
+const { STARTING_BALANCE } = require("../config");
+const { ec, cryptoHash } = require("../util");
 
 class Wallet {
   constructor() {
     this.balance = STARTING_BALANCE;
+
     this.keyPair = ec.genKeyPair();
+
     this.publicKey = this.keyPair.getPublic().encode("hex");
   }
 
@@ -14,12 +15,12 @@ class Wallet {
     return this.keyPair.sign(cryptoHash(data));
   }
 
-  createTransaction({ amount, recipient }) {
+  createTransaction({ recipient, amount }) {
     if (amount > this.balance) {
-      throw new Error("Amound exeeds balance");
+      throw new Error("Amount exceeds balance");
     }
 
-    return new Transaction({ senderWallet: this, amount, recipient });
+    return new Transaction({ senderWallet: this, recipient, amount });
   }
 }
 
