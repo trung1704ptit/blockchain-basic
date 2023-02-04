@@ -1,5 +1,6 @@
 const Wallet = require("./index");
 const { verifySignature } = require("../util");
+const Transaction = require("./transaction");
 
 describe("Wallet", () => {
   let wallet;
@@ -36,6 +37,41 @@ describe("Wallet", () => {
           signature: new Wallet().sign(data),
         })
       ).toBe(false);
+    });
+  });
+
+  describe("createTransaction()", () => {
+    describe("and the amound exeeds the balance", () => {
+      it("throws an error", () => {
+        expect(() =>
+          wallet.createTransaction({
+            amount: 9999999,
+            recipient: "poor-recipient",
+          })
+        ).toThrow("Amound exeeds balance");
+      });
+    });
+
+    describe("and the amound is valid", () => {
+      let transaction, amount, recipient;
+
+      beforeEach(() => {
+        amount = 50;
+        recipient = "poor-recipient";
+        transaction = wallet.createTransaction({ amount, recipient });
+      });
+
+      it("creates an instance of `Transaction`", () => {
+        expect(transaction instanceof Transaction).toBe(true)
+      });
+
+      it("matches the transaction input with the wallet", () => {
+        expect(transaction.input.address).toEqual(wallet.publicKey)
+      });
+
+      it("outputs the amount the recipient", () => {
+        expect(transaction.outputMap[recipient]).toEqual(amount);
+      });
     });
   });
 });
